@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  control-plane:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: infra-provisioning-engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - SIMULATE_TERRAFORM=true
+      - DB_PATH=/data/provisioner.db
+      - TERRAFORM_RUN_DIR=/data/runs
+    volumes:
+      - provisioner_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  provisioner_data:
+    driver: local
